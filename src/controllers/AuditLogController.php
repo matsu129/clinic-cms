@@ -1,7 +1,12 @@
 <?php
-namespace App\Controllers;
+declare(strict_types=1);
 
-use App\Core\Database;
+namespace Controllers;
+
+require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../core/AuditLogger.php';
+
+use Core\Database;
 use Exception;
 
 class AuditLogController {

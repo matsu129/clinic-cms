@@ -3,20 +3,21 @@ declare(strict_types=1);
 
 namespace Controllers;
 
+require_once __DIR__ . '/../models/Doctor.php';
 require_once __DIR__ . '/../core/AuditLogger.php';
-require_once __DIR__ . '/../models/Patient.php';
-use Models\Patient;
+
+use Models\Doctor;
 use Core\AuditLogger;
 
-class PatientController
+class DoctorController
 {
-    private Patient $patientModel;
+    private Doctor $doctorModel;
 
     public function __construct()
     {
-        $this->patientModel = new Patient();
+        $this->doctorModel = new Doctor();
     }
-    
+
     // get CurrentUserID
     private function getCurrentUserId(): ?int {
       if (session_status() === PHP_SESSION_NONE) {
@@ -25,53 +26,53 @@ class PatientController
       return $_SESSION['user']['id'] ?? null;
     }
 
-    // Get all patients
+    // Get all doctors
     public function index(): array
     {
-        $patients = $this->patientModel->getAll();
+        $doctors = $this->doctorModel->getAll();
         $userId = $this->getCurrentUserId();
-        AuditLogger::logAction("Fetched all patients", $userId);
-        return $patients;
+        AuditLogger::logAction("Fetched all doctors", $userId);
+        return $doctors;
     }
 
-    // Get patient by ID
+    // Get doctor by ID
     public function show(int $id): ?array
     {
-        $patient = $this->patientModel->findById($id);
+        $doctor = $this->doctorModel->findById($id);
         $userId = $this->getCurrentUserId();
-        AuditLogger::logAction("Fetched patient ID: $id" , $userId);
-        return $patient;
+        AuditLogger::logAction("Fetched doctor ID: $id", $userId);
+        return $doctor;
     }
 
-    // Create new patient
+    // Create new doctor
     public function create(array $data): bool
     {
-        $result = $this->patientModel->create($data);
+        $result = $this->doctorModel->create($data);
         $userId = $this->getCurrentUserId();
         if ($result) {
-            AuditLogger::logAction("Created new patient: " . ($data['name'] ?? 'Unknown'), $userId);
+            AuditLogger::logAction("Created new doctor: " . ($data['name'] ?? 'Unknown'), $userId);
         }
         return $result;
     }
 
-    // Update patient
+    // Update doctor
     public function update(int $id, array $data): bool
     {
-        $result = $this->patientModel->update($id, $data);
+        $result = $this->doctorModel->update($id, $data);
         $userId = $this->getCurrentUserId();
         if ($result) {
-            AuditLogger::logAction("Updated patient ID: $id", $userId);
+            AuditLogger::logAction("Updated doctor ID: $id", $userId);
         }
         return $result;
     }
 
-    // Delete patient
+    // Delete doctor
     public function delete(int $id): bool
     {
-        $result = $this->patientModel->delete($id);
+        $result = $this->doctorModel->delete($id);
         $userId = $this->getCurrentUserId();
         if ($result) {
-            AuditLogger::logAction("Deleted patient ID: $id", $userId);
+            AuditLogger::logAction("Deleted doctor ID: $id", $userId);
         }
         return $result;
     }

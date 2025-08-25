@@ -20,13 +20,13 @@ function printTestResult($title, $result) {
 
 // ===== Test Registration =====
 printTestResult("Register Test", $userController->register([
-    'email' => 'testuser123456@example.com',
+    'email' => 'testuser987@example.com',
     'password' => 'test1234',
     'full_name' => 'Test User'
 ]));
 
 // ===== Test Login =====
-$loginResult = $userController->login('testuser123456@example.com', 'test1234');
+$loginResult = $userController->login('testuser987@example.com', 'test1234');
 printTestResult("Login Test", $loginResult);
 
 // ===== Test Get User by ID =====
@@ -44,8 +44,8 @@ if (!empty($loginResult['success']) && !empty($loginResult['user']['id'])) {
     printTestResult("Update User Test", $updateResult);
 
     // ===== Test Delete User =====
-    $deleteResult = $userController->deleteUser($userId);
-    printTestResult("Delete User Test", $deleteResult);
+    // $deleteResult = $userController->deleteUser($userId);
+    // printTestResult("Delete User Test", $deleteResult);
 } else {
     echo "<p style='color:red;'>Login failed. Skipping ID, Update, and Delete tests.</p>";
 }

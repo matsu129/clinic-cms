@@ -4,7 +4,10 @@ declare(strict_types=1);
 namespace Controllers;
 
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../core/AuditLogger.php';
+
 use Models\User;
+use Core\AuditLogger;
 
 class UserController
 {
@@ -13,18 +16,30 @@ class UserController
     public function __construct()
     {
         $this->userModel = new User();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    // get current userId
+    private function getCurrentUserId(): ?int {
+        return $_SESSION['user']['id'] ?? null;
     }
 
     // Get all users
     public function index(): array
     {
-        return $this->userModel->getAll();
+        $users = $this->userModel->getAll();
+        AuditLogger::logAction("Fetched all users", $this->getCurrentUserId());
+        return $users;
     }
 
     // Get user by ID
     public function show(int $id): ?array
     {
-        return $this->userModel->findById($id);
+        $user = $this->userModel->findById($id);
+        AuditLogger::logAction("Fetched user ID: $id", $this->getCurrentUserId());
+        return $user;
     }
 
     // Register new user
@@ -33,27 +48,43 @@ class UserController
         if (!isset($data['email'], $data['password'], $data['full_name'])) {
             throw new \InvalidArgumentException('Missing required fields.');
         }
-        return $this->userModel->create($data);
+
+        $result = $this->userModel->create($data);
+        AuditLogger::logAction(
+            $result ? "Registered new user: {$data['email']}" : "Failed to register user: {$data['email']}",
+            $this->getCurrentUserId()
+        );
+
+        return $result;
     }
 
     // Update user
     public function updateUser(int $id, string $email, string $fullName): bool
     {
-        if (empty($email) || empty($fullName)) {
-            throw new \InvalidArgumentException('Email and full name are required.');
-        }
-        return $this->userModel->update($id, [
+        $result = $this->userModel->update($id, [
             'email' => $email,
             'full_name' => $fullName,
-            'role_id' => 2,      // default role
-            'is_active' => 1     // default active
+            'role_id' => 2,
+            'is_active' => 1
         ]);
+
+        AuditLogger::logAction(
+            $result ? "Updated user ID: $id" : "Failed to update user ID: $id",
+            $this->getCurrentUserId()
+        );
+
+        return $result;
     }
 
     // Delete user
     public function deleteUser(int $id): bool
     {
-        return $this->userModel->delete($id);
+        $result = $this->userModel->delete($id);
+        AuditLogger::logAction(
+            $result ? "Deleted user ID: $id" : "Failed to delete user ID: $id",
+            $this->getCurrentUserId()
+        );
+        return $result;
     }
 
     // Login user
@@ -61,14 +92,13 @@ class UserController
     {
         $user = $this->userModel->findByEmail($email);
         if ($user && password_verify($password, $user['password_hash'])) {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
             $_SESSION['user'] = [
                 'id' => $user['id'],
                 'email' => $user['email'],
                 'role_id' => $user['role_id']
             ];
+
+            AuditLogger::logAction("User logged in: {$email}", $user['id']);
 
             return [
                 'success' => true,
@@ -76,6 +106,8 @@ class UserController
                 'user' => $user
             ];
         }
+
+        AuditLogger::logAction("Failed login attempt: {$email}", $user['id'] ?? null);
 
         return [
             'success' => false,
@@ -86,8 +118,9 @@ class UserController
     // Logout user
     public function logout(): void
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
-        }
+        $userId = $_SESSION['user']['id'] ?? null;
+        $userEmail = $_SESSION['user']['email'] ?? 'unknown';
+        AuditLogger::logAction("User logged out: $userEmail", $userId);
+        session_destroy();
     }
 }
