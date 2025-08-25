@@ -1,33 +1,102 @@
 <?php
+declare(strict_types=1);
+
+namespace Models;
+
 require_once __DIR__ . '/../core/Database.php';
 
-class User {
-    private $db;
+use Core\Database;
+use PDO;
+use PDOException;
 
-    public function __construct() {
-        $this->db = Database::getInstance();
+class User
+{
+    private PDO $db;
+
+    public function __construct()
+    {
+        // Get Database instance
+        $dbInstance = Database::getInstance();
+
+        // Get PDO connection from instance
+        $this->db = $dbInstance->getConnection();
     }
 
-    // find by id
-    public function findById($id) {
-        $sql = "SELECT * FROM users WHERE id = ?";
-        $stmt = $this->db->query($sql, [$id]);
-        return $stmt->fetch();
+    // Get all users
+    public function getAll(): array
+    {
+        $stmt = $this->db->query("SELECT * FROM users");
+        return $stmt->fetchAll();
     }
 
-    // find by Email
-    public function findByEmail($email) {
-        $sql = "SELECT * FROM users WHERE email = ?";
-        $stmt = $this->db->query($sql, [$email]);
-        return $stmt->fetch();
+    // Find user by ID
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $result = $stmt->fetch();
+        return $result !== false ? $result : null;
     }
 
-    // create new account
-    public function create($email, $password, $fullName, $roleId = 1) {
-        $passwordHash = password_hash($password, PASSWORD_BCRYPT);
-        $sql = "INSERT INTO users (email, password_hash, full_name, role_id, is_active, created_at, updated_at)
-                VALUES (?, ?, ?, ?, 1, NOW(), NOW())";
-        return $this->db->query($sql, [$email, $passwordHash, $fullName, $roleId]);
+    // Find user by email
+    public function findByEmail(string $email): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email");
+        $stmt->execute([':email' => $email]);
+        $result = $stmt->fetch();
+        return $result !== false ? $result : null;
+    }
+
+    // Create new user
+    public function create(array $data): bool
+    {
+        try {
+            $sql = "INSERT INTO users (email, password_hash, full_name, role_id, is_active, created_at, updated_at)
+                    VALUES (:email, :password_hash, :full_name, :role_id, :is_active, NOW(), NOW())";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':email' => $data['email'],
+                ':password_hash' => password_hash($data['password'], PASSWORD_DEFAULT),
+                ':full_name' => $data['full_name'],
+                ':role_id' => $data['role_id'] ?? 2,
+                ':is_active' => $data['is_active'] ?? 1
+            ]);
+        } catch (PDOException $e) {
+            error_log("User create error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Update user
+    public function update(int $id, array $data): bool
+    {
+        try {
+            $sql = "UPDATE users 
+                    SET email = :email, full_name = :full_name, role_id = :role_id, is_active = :is_active, updated_at = NOW()
+                    WHERE id = :id";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':email' => $data['email'],
+                ':full_name' => $data['full_name'],
+                ':role_id' => $data['role_id'],
+                ':is_active' => $data['is_active'],
+                ':id' => $id
+            ]);
+        } catch (PDOException $e) {
+            error_log("User update error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Delete user
+    public function delete(int $id): bool
+    {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
+            return $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            error_log("User delete error: " . $e->getMessage());
+            return false;
+        }
     }
 }
-?>
