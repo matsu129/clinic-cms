@@ -30,7 +30,7 @@ if (session_status() ===  PHP_SESSION_NONE) {
         <nav class="header-nav">
             <a href="/home">Home</a>
             <a href="/auth/login">Login</a>
-            <a href="/logout.php">Logout</a>
+            <a href="/auth/logout">Logout</a>
         </nav>
     </header>
     <main>

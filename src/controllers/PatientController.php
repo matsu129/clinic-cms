@@ -27,13 +27,12 @@ class PatientController
     }
 
     // Get all patients and show view
-    public function index(): void
+    public function index()
     {
         $patients = $this->patientModel->getAll();
         $userId = $this->getCurrentUserId();
         AuditLogger::logAction("Fetched all patients", $userId);
-
-        include __DIR__ . '/../views/patient/index.php';
+        return $patients;
     }
 
     // Get patient by ID
