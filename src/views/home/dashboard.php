@@ -39,7 +39,7 @@ $section = $_GET['section'] ?? 'patients';
 </style>
 </head>
 <body>
-<?php include __DIR__ . '/../../includes/header.php'; ?>
+<?php include __DIR__ . '/../../../public/includes/header.php'; ?>
 
 <div class="dashboard-container">
     <div class="sidebar">
@@ -90,6 +90,6 @@ $section = $_GET['section'] ?? 'patients';
     </div>
 </div>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../../../public/includes/footer.php'; ?>
 </body>
 </html>
