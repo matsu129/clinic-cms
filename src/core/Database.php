@@ -1,12 +1,9 @@
 <?php
-namespace Core;
+namespace App\Core;
 
 use PDO;
 use PDOException;
 use Exception;
-
-// load config
-require_once __DIR__ . '/../config/config.php';
 
 class Database {
     private static ?Database $instance = null;

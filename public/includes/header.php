@@ -12,7 +12,7 @@ if (session_status() ===  PHP_SESSION_NONE) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinic-CMS</title>
     <base href="/clinic-cms/">
-    <link rel="stylesheet" href="/clinic-cms/css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -28,9 +28,9 @@ if (session_status() ===  PHP_SESSION_NONE) {
             </div>
         </div>
         <nav class="header-nav">
-          <a href="/clinic-cms/index.php">Home</a>
-    <a href="/clinic-cms/login.php">Login</a>
-    <a href="/clinic-cms/logout.php">Logout</a>
+            <a href="/home">Home</a>
+            <a href="/auth/login">Login</a>
+            <a href="/logout.php">Logout</a>
         </nav>
     </header>
     <main>

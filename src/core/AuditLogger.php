@@ -1,8 +1,8 @@
 <?php
-namespace Core;
+namespace App\Core;
 
 require_once __DIR__ . '/Database.php';
-use \Core\Database;
+use App\Core\Database;
 use Exception;
 
 class AuditLogger {

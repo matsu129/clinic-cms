@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Controllers;
+namespace App\Controllers;
+
 
 require_once __DIR__ . '/../core/AuditLogger.php';
 require_once __DIR__ . '/../models/Patient.php';
-use Models\Patient;
-use Core\AuditLogger;
+use App\Models\Patient;
+use App\Core\AuditLogger;
 
 class PatientController
 {
@@ -25,13 +26,14 @@ class PatientController
       return $_SESSION['user']['id'] ?? null;
     }
 
-    // Get all patients
-    public function index(): array
+    // Get all patients and show view
+    public function index(): void
     {
         $patients = $this->patientModel->getAll();
         $userId = $this->getCurrentUserId();
         AuditLogger::logAction("Fetched all patients", $userId);
-        return $patients;
+
+        include __DIR__ . '/../views/patient/index.php';
     }
 
     // Get patient by ID

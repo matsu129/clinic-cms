@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../controllers/UserController.php';
 
-use Controllers\UserController; 
+use App\Controllers\UserController; 
 
 // Initialize controller
 $userController = new UserController();
@@ -20,7 +20,7 @@ function printTestResult($title, $result) {
 
 // ===== Test Registration =====
 printTestResult("Register Test", $userController->register([
-    'email' => 'testuser987@example.com',
+    'email' => 'testuser@example.com',
     'password' => 'test1234',
     'full_name' => 'Test User'
 ]));

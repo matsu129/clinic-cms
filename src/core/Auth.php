@@ -1,5 +1,5 @@
 <?php
-namespace Core;
+namespace App\Core;
 
 class Auth {
     public static function startSession(): void {

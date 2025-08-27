@@ -1,50 +1,56 @@
 <?php
-namespace Controllers;
+namespace App\Controllers;
 
-use App\Contracts\AuthInterface;
-use Core\Auth;
+use App\Core\AuthInterface;
+use App\Core\Auth;
 use PDO;
 use PDOException;
 
-class AuthController implements AuthInterface {
-    private PDO $db;
+require_once __DIR__ . '/../config/config.php';
 
-    public function __construct(PDO $db) {
+class AuthController implements AuthInterface {
+    private ?PDO $db;
+
+    public function __construct(?PDO $db = null) {
         $this->db = $db;
     }
 
-    public function login(string $email, string $password): bool {
-        $query = "SELECT id, password FROM users WHERE email = :email LIMIT 1";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
-        $stmt->execute();
 
+    public function login(string $email, string $password): bool {
+        $stmt = $this->db->prepare("SELECT id, full_name, role_id, password_hash FROM users WHERE email = :email LIMIT 1");
+        $stmt->bindValue(':email', $email);
+        $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password'])) {
-            Auth::login($user['id']);
+        if ($user && password_verify($password, $user['password_hash'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['full_name'] = $user['full_name'];
+            $_SESSION['role_id'] = $user['role_id'];
             return true;
         }
         return false;
     }
 
     public function logout(): void {
-        Auth::logout();
+        session_destroy();
+        header('Location: /auth/login');
+        exit;
     }
 
     public function check(): bool {
-        return Auth::checkLogin();
+        return isset($_SESSION['user_id']);
     }
 
     public function user(): ?array {
-        if (!$this->check()) {
-            return null;
-        }
+        if (!$this->check()) return null;
 
-        $query = "SELECT id, email, name FROM users WHERE id = :id LIMIT 1";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':id', $_SESSION['user_id'], PDO::PARAM_INT);
+        $stmt = $this->db->prepare("SELECT id, full_name, email, role_id FROM users WHERE id = :id LIMIT 1");
+        $stmt->bindValue(':id', $_SESSION['user_id']);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function showLogin(): void {
+        include BASE_PATH.'/src/views/auth/login.php';
     }
 }

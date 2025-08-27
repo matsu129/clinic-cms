@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-require_once __DIR__ . '/../core/Database.php';
 
-use Core\Database;
+use App\Core\Database;
 use PDO;
 use PDOException;
 

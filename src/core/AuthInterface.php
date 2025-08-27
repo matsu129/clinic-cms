@@ -1,5 +1,5 @@
 <?php
-namespace App\Contracts;
+namespace App\Core;
 
 interface AuthInterface {
     public function login(string $email, string $password): bool;

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Controllers;
+namespace App\Controllers;
 
 require_once __DIR__ . '/../models/Doctor.php';
 require_once __DIR__ . '/../core/AuditLogger.php';
 
 use App\Models\Doctor;
-use Core\AuditLogger;
+use App\Core\AuditLogger;
 
 class DoctorController
 {
