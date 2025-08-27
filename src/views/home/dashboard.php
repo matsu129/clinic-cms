@@ -47,9 +47,10 @@ $section = $_GET['section'] ?? 'patients';
         <p>Welcome, <?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></p>
         <p>Role: <?= $_SESSION['role_id'] == 1 ? 'Admin' : ($_SESSION['role_id'] == 2 ? 'Doctor' : 'Reception') ?></p>
         <ul>
-            <li><a href="?section=patients" class="<?= $section=='patients'?'active':'' ?>">Patients</a></li>
-            <li><a href="?section=appointments" class="<?= $section=='appointments'?'active':'' ?>">Appointments</a></li>
-            <li><a href="?section=medical_notes" class="<?= $section=='medical_notes'?'active':'' ?>">Medical Notes</a></li>
+            <?php $baseUrl = '/dashboard'; ?>
+            <li><a href="<?= $baseUrl ?>?section=patients" class="<?= $section=='patients'?'active':'' ?>">Patients</a></li>
+            <li><a href="<?= $baseUrl ?>?section=appointments" class="<?= $section=='appointments'?'active':'' ?>">Appointments</a></li>
+            <li><a href="<?= $baseUrl ?>?section=medical_notes" class="<?= $section=='medical_notes'?'active':'' ?>">Medical Notes</a></li>
         </ul>
         <a href="?section=logout">Logout</a>
     </div>

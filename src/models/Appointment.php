@@ -104,7 +104,7 @@ class Appointment implements ModelInterface
     public function getAll(): array
     {
         $sql = "SELECT a.*, 
-                       p.full_name AS patient_name, 
+                       p.name AS patient_name, 
                        d.name AS doctor_name
                 FROM {$this->table} a
                 JOIN patients p ON a.patient_id = p.id

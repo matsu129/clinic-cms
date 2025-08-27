@@ -20,7 +20,7 @@ if (session_status() ===  PHP_SESSION_NONE) {
     <header>
         <div class="header-top">
             <div class="header-left">
-                <img class="heart" src="/clinic-cms/images/heart.jpg" alt="heart">
+                <img class="heart" src="/../images/heart.jpg" alt="heart">
                 <h1>Clinic-CMS</h1>
             </div>
             <div class="header-right">
