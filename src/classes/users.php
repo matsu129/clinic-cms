@@ -27,6 +27,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login</title>
 </head>
 <body>
+    <?php include 'includes/header.php'; ?>
     <h2>Login</h2>
     <?php if (isset($error_message)) { echo "<p style='color:red;'>$error_message</p>"; } ?>
     <form method="post" action="users.php">
@@ -43,7 +44,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
       <button type="submit">Create user</button>
          <p class="register-link">Don't have an account? <a href="register.php" class="form-link">Register</a></p>  
     </form>
-    
+  <?php include 'includes/footer.php'; ?>  
 </body>
 </html>
 

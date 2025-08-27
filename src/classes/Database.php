@@ -3,7 +3,7 @@
 session_start();
 // If the user is logged in, redirect to the home page
 if (isset($_SESSION['account_loggedin'])) {
-    header('Location: home.php');
+    header('Location: /clinic-cms/page/logs/dashboard.php');
     exit;
 }
 ?>
@@ -15,6 +15,7 @@ if (isset($_SESSION['account_loggedin'])) {
         <title>Login</title>
     </head>
     <body>
+        <?php include 'includes/header.php'; ?>
         <div class="login">
 
             <h1>Clinic Login</h1>
@@ -40,5 +41,6 @@ if (isset($_SESSION['account_loggedin'])) {
             </form>
 
         </div>
+        <?php include 'includes/footer.php'; ?>
     </body>
 </html>
