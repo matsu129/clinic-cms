@@ -1,15 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Models;
+namespace App\Models;
 
 require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../App/Models/ModelInterface.php';
 
 use Core\Database;
 use PDO;
 use PDOException;
+use App\Models\ModelInterface;
 
-class Doctor
+class Doctor implements ModelInterface
 {
     private PDO $db;
 
@@ -18,7 +20,12 @@ class Doctor
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // Create new doctor
+    /**
+     * Create a new doctor record
+     *
+     * @param array $data
+     * @return bool
+     */
     public function create(array $data): bool
     {
         $sql = "INSERT INTO doctors (user_id, name, specialty, phone, email, created_at, updated_at)
@@ -34,7 +41,12 @@ class Doctor
         ]);
     }
 
-    // Get doctor by ID
+    /**
+     * Find a doctor by ID
+     *
+     * @param int $id
+     * @return array|null
+     */
     public function findById(int $id): ?array
     {
         $stmt = $this->db->prepare("SELECT * FROM doctors WHERE id = :id");
@@ -43,14 +55,24 @@ class Doctor
         return $result ?: null;
     }
 
-    // Get all doctors
+    /**
+     * Get all doctors
+     *
+     * @return array
+     */
     public function getAll(): array
     {
         $stmt = $this->db->query("SELECT * FROM doctors ORDER BY id ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Update doctor
+    /**
+     * Update a doctor record by ID
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
     public function update(int $id, array $data): bool
     {
         $sql = "UPDATE doctors
@@ -68,7 +90,12 @@ class Doctor
         ]);
     }
 
-    // Delete doctor
+    /**
+     * Delete a doctor record by ID
+     *
+     * @param int $id
+     * @return bool
+     */
     public function delete(int $id): bool
     {
         $stmt = $this->db->prepare("DELETE FROM doctors WHERE id = :id");
