@@ -1,5 +1,4 @@
 <?php
-session_start();
 require '../../config/config.php'; // Adjust path 
 
 $cookieParams = session_get_cookie_params();
@@ -11,6 +10,7 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Strict'
 ]);
+session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
