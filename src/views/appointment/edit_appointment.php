@@ -1,84 +1,129 @@
 <?php
-include '../includes/db.php';
-
-if (!isset($_GET['id'])) {
-    die("Appointment ID not provided.");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
-$id = (int) $_GET['id'];
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $patient_id = $_POST['patient_id'];
-    $doctor_id = $_POST['doctor_id'];
-    $appointment_date = $_POST['appointment_date'];
-    $notes = $_POST['notes'];
+require_once __DIR__ . "/../../config/config.php";
+require_once __DIR__ . "/../../controllers/AppointmentController.php";
+require_once __DIR__ . "/../../controllers/DoctorController.php";
+require_once __DIR__ . "/../../controllers/PatientController.php";
 
-    $sql = "UPDATE appointments 
-            SET patient_id=?, doctor_id=?, appointment_date=?, notes=? 
-            WHERE id=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iissi", $patient_id, $doctor_id, $appointment_date, $notes, $id);
+use App\Controllers\AppointmentController;
+use App\Controllers\DoctorController;
+use App\Controllers\PatientController;
 
-    if ($stmt->execute()) {
-        echo "✅ Appointment updated successfully!";
-        header("Location: list_appointments.php");
-        exit();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: /auth/login.php");
+    exit;
+}
+
+$appointmentController = new AppointmentController();
+$doctorController = new DoctorController();
+$patientController = new PatientController();
+
+// Get ID
+$id = $_GET['id'] ?? null;
+
+// Fetch doctors and patients for dropdowns
+$doctors = $doctorController->index(); 
+$patients = $patientController->index();
+
+if ($id) {
+    // Editing
+    $appointment = $appointmentController->show($id);
+    if (!$appointment) {
+        echo "Appointment not found.";
+        exit;
+    }
+} else {
+    // New appointment
+    $appointment = [
+        'doctor_id' => '',
+        'patient_id' => '',
+        'scheduled_at' => '',
+        'status' => 'Scheduled',
+        'notes' => ''
+    ];
+}
+
+$error = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $formData = [
+        'doctor_id' => $_POST['doctor_id'],
+        'patient_id' => $_POST['patient_id'],
+        'scheduled_at' => $_POST['scheduled_at'],
+        'status' => $_POST['status'],
+        'notes' => $_POST['notes'],
+        'created_by' => $_SESSION['user_id']  // logged-in user
+    ];
+
+    if ($id) {
+        // Update
+        if ($appointmentController->update($id, $formData)) {
+            header("Location: /dashboard?section=appointments");
+            exit;
+        } else {
+            $error = "Failed to update appointment.";
+        }
     } else {
-        echo "❌ Error updating appointment: " . $conn->error;
+        // Create
+        if ($appointmentController->store($formData)) {
+            header("Location: /dashboard?section=appointments");
+            exit;
+        } else {
+            $error = "Failed to create appointment.";
+        }
     }
 }
-$sql = "SELECT * FROM appointments WHERE id=?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    die("Appointment not found.");
-}
-$appointment = $result->fetch_assoc();
-$patients = $conn->query("SELECT id, name FROM patients");
-$doctors = $conn->query("SELECT id, name FROM doctors");
 ?>
-   <!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Edit Appointment</title>
+<meta charset="UTF-8">
+<title><?= $id ? 'Edit Appointment' : 'Add New Appointment' ?></title>
 </head>
 <body>
-    <h2>Edit Appointment</h2>
+<h1><?= $id ? 'Edit Appointment' : 'Add New Appointment' ?></h1>
+<?php if (!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
 
-    <form method="POST">
-        <label>Patient:</label>
-        <select name="patient_id" required>
-            <?php while ($p = $patients->fetch_assoc()): ?>
-                <option value="<?= $p['id'] ?>" <?= ($p['id'] == $appointment['patient_id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($p['name']) ?>
-                </option>
-            <?php endwhile; ?>
-        </select>
-        <br><br>
+<form method="POST">
+    <label>Doctor</label>
+    <select name="doctor_id" required>
+        <option value="">Select Doctor</option>
+        <?php foreach ($doctors as $doctor): ?>
+            <option value="<?= $doctor['id'] ?>" <?= $appointment['doctor_id']==$doctor['id']?'selected':'' ?>>
+                <?= htmlspecialchars($doctor['name']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select><br>
 
-        <label>Doctor:</label>
-        <select name="doctor_id" required>
-            <?php while ($d = $doctors->fetch_assoc()): ?>
-                <option value="<?= $d['id'] ?>" <?= ($d['id'] == $appointment['doctor_id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($d['name']) ?>
-                </option>
-            <?php endwhile; ?>
-        </select>
-        <br><br>
+    <label>Patient</label>
+    <select name="patient_id" required>
+        <option value="">Select Patient</option>
+        <?php foreach ($patients as $patient): ?>
+            <option value="<?= $patient['id'] ?>" <?= $appointment['patient_id']==$patient['id']?'selected':'' ?>>
+                <?= htmlspecialchars($patient['name']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select><br>
 
-        <label>Appointment Date:</label>
-        <input type="datetime-local" name="appointment_date" value="<?= date('Y-m-d\TH:i', strtotime($appointment['appointment_date'])) ?>" required>
-        <br><br>
+    <label>Scheduled At</label>
+    <input type="datetime-local" name="scheduled_at" value="<?= htmlspecialchars($appointment['scheduled_at']) ?>" required><br>
 
-        <label>Notes:</label>
-        <textarea name="notes"><?= htmlspecialchars($appointment['notes']) ?></textarea>
-        <br><br>
+    <label>Status</label>
+    <select name="status">
+        <option value="Scheduled" <?= $appointment['status']=='Scheduled'?'selected':'' ?>>Scheduled</option>
+        <option value="Completed" <?= $appointment['status']=='Completed'?'selected':'' ?>>Completed</option>
+        <option value="Cancelled" <?= $appointment['status']=='Cancelled'?'selected':'' ?>>Cancelled</option>
+    </select><br>
 
-        <button type="submit">Save Changes</button>
-    </form>
+    <label>Notes</label>
+    <textarea name="notes"><?= htmlspecialchars($appointment['notes']) ?></textarea><br>
 
+    <button type="submit"><?= $id ? 'Save' : 'Create' ?></button>
+    <a href="/dashboard?section=appointments">Cancel</a>
+</form>
 </body>
 </html>

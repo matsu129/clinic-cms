@@ -83,8 +83,29 @@ switch ($request) {
         }
         break;
 
-    case '/appointments':
-        loadController('AppointmentController');
+    case '/appointment/create':
+        include BASE_PATH.'/src/views/appointment/edit_appointment.php';
+        break;
+
+    case '/appointment/edit':
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $userController = new App\Controllers\UserController();
+            $user = $userController->show((int)$id);
+            include BASE_PATH.'/src/views/appointment/edit_appointment.php';
+        } else {
+            echo "<h1>400 Bad Request</h1><p>ID is required.</p>";
+        }
+        break;
+    
+    case '/appointment/delete':
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            loadController('AppointmentController', 'destroy', [$id]);
+            include BASE_PATH.'/src/views/home/dashboard.php';
+        } else {
+            echo "<h1>400 Bad Request</h1><p>ID is required.</p>";
+        }
         break;
 
     case '/audit-logs':
