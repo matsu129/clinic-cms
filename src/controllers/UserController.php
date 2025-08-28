@@ -48,8 +48,15 @@ class UserController
         if (!isset($data['email'], $data['password'], $data['full_name'])) {
             throw new \InvalidArgumentException('Missing required fields.');
         }
-
-        $result = $this->userModel->create($data);
+        $roleId = $data['role_id'] ?? 2;
+        $userData = [
+            'email' => $data['email'],
+            'full_name' => $data['full_name'],
+            'password' => $data['password'],
+            'role_id' => $roleId,
+            'is_active' => 1
+        ];
+        $result = $this->userModel->create($userData);
         AuditLogger::logAction(
             $result ? "Registered new user: {$data['email']}" : "Failed to register user: {$data['email']}",
             $this->getCurrentUserId()
@@ -59,14 +66,13 @@ class UserController
     }
 
     // Update user
-    public function updateUser(int $id, string $email, string $fullName): bool
+    public function updateUser(int $id, array $data): bool
     {
-        $result = $this->userModel->update($id, [
-            'email' => $email,
-            'full_name' => $fullName,
-            'role_id' => 2,
-            'is_active' => 1
-        ]);
+        $data['role_id'] = $data['role_id'] ?? 2;
+        $data['is_active'] = $data['is_active'] ?? 1;
+        $updateData = array_filter($data, fn($v) => !is_null($v));
+
+        $result = $this->userModel->update($id, $updateData);
 
         AuditLogger::logAction(
             $result ? "Updated user ID: $id" : "Failed to update user ID: $id",
@@ -75,6 +81,7 @@ class UserController
 
         return $result;
     }
+
 
     // Delete user
     public function deleteUser(int $id): bool
