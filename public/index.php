@@ -35,8 +35,52 @@ switch ($request) {
         loadController('HomeController');
         break;
 
-    case '/patients':
-        loadController('PatientController');
+    case '/patients/create':
+        include BASE_PATH.'/src/views/patient/edit_patient.php';
+        break;
+
+    case '/patients/edit':
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            include BASE_PATH.'/src/views/patient/edit_patient.php';
+        } else {
+            echo "<h1>400 Bad Request</h1><p>ID is required.</p>";
+        }
+        break;
+    
+    case '/patients/delete':
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            loadController('PatientController', 'delete', [$id]);
+            include BASE_PATH.'/src/views/home/dashboard.php';
+        } else {
+            echo "<h1>400 Bad Request</h1><p>ID is required.</p>";
+        }
+        break;
+
+    case '/users/create':
+        include BASE_PATH.'/src/views/user/edit_user.php';
+        break;
+
+    case '/users/edit':
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $userController = new App\Controllers\UserController();
+            $user = $userController->show((int)$id);
+            include BASE_PATH.'/src/views/user/edit_user.php';
+        } else {
+            echo "<h1>400 Bad Request</h1><p>ID is required.</p>";
+        }
+        break;
+    
+    case '/users/delete':
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            loadController('UserController', 'deleteUser', [$id]);
+            include BASE_PATH.'/src/views/home/dashboard.php';
+        } else {
+            echo "<h1>400 Bad Request</h1><p>ID is required.</p>";
+        }
         break;
 
     case '/appointments':
@@ -89,8 +133,8 @@ switch ($request) {
         loadController('MedicalNoteController');
         break;
 
-    case '/users':
-        loadController('UserController');
+    case '/profile':
+        include BASE_PATH.'/src/views/profile/edit_profile.php';
         break;
 
     default:

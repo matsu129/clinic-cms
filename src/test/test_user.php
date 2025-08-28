@@ -4,6 +4,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../controllers/UserController.php';
+require_once __DIR__ . '/../config/config.php'; 
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Controllers\UserController; 
 
@@ -20,13 +22,14 @@ function printTestResult($title, $result) {
 
 // ===== Test Registration =====
 printTestResult("Register Test", $userController->register([
-    'email' => 'testuser@example.com',
+    'email' => 'Admin2@example.com',
     'password' => 'test1234',
-    'full_name' => 'Test User'
+    'full_name' => 'Admin User2',
+    'role_id' => 1
 ]));
 
 // ===== Test Login =====
-$loginResult = $userController->login('testuser987@example.com', 'test1234');
+$loginResult = $userController->login('Admin2@example.com', 'test1234');
 printTestResult("Login Test", $loginResult);
 
 // ===== Test Get User by ID =====
@@ -38,8 +41,8 @@ if (!empty($loginResult['success']) && !empty($loginResult['user']['id'])) {
     // ===== Test Update User =====
     $updateResult = $userController->updateUser(
         $userId,
-        'updateduser@example.com',
-        'Updated User'
+        ['updatedadmin@example.com',
+        'Updated Admin']
     );
     printTestResult("Update User Test", $updateResult);
 

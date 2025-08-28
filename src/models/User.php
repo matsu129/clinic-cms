@@ -81,7 +81,7 @@ class User implements ModelInterface
         try {
             $sql = "UPDATE {$this->table} 
                 SET email = :email, full_name = :full_name, role_id = :role_id, 
-                    is_active = :is_active, updated_at = NOW()
+                    is_active = :is_active, updated_at = NOW(), profile_pic = :profile_pic
                 WHERE id = :id";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
@@ -89,7 +89,8 @@ class User implements ModelInterface
                 ':full_name' => $data['full_name'],
                 ':role_id' => $data['role_id'],
                 ':is_active' => $data['is_active'],
-                ':id' => $id
+                ':id' => $id,
+                ':profile_pic' => $data['profile_pic']
             ]);
         } catch (PDOException $e) {
             error_log("User update error: " . $e->getMessage());

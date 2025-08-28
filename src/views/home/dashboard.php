@@ -45,9 +45,13 @@ $section = $_GET['section'] ?? 'patients';
         <p>Role: <?= $_SESSION['role_id'] == 1 ? 'Admin' : ($_SESSION['role_id'] == 2 ? 'Doctor' : 'Reception') ?></p>
         <ul>
             <?php $baseUrl = '/dashboard'; ?>
+            <li><a href="/profile" class="<?= $request=='/profile'?'active':'' ?>">My Profile</a></li>
             <li><a href="<?= $baseUrl ?>?section=patients" class="<?= $section=='patients'?'active':'' ?>">Patients</a></li>
             <li><a href="<?= $baseUrl ?>?section=appointments" class="<?= $section=='appointments'?'active':'' ?>">Appointments</a></li>
             <li><a href="<?= $baseUrl ?>?section=medical_notes" class="<?= $section=='medical_notes'?'active':'' ?>">Medical Notes</a></li>
+            <?php if ($_SESSION['role_id'] == 1): ?>
+                <li><a href="<?= $baseUrl ?>?section=users" class="<?= $section=='users'?'active':'' ?>">Users</a></li>
+            <?php endif; ?>
         </ul>
         <a href="/auth/logout">Logout</a>
     </div>
@@ -59,6 +63,7 @@ $section = $_GET['section'] ?? 'patients';
                 $patientController = new PatientController();
                 $patients = $patientController->index();
                 echo "<h2>Patients List</h2>";
+                echo "<a href='/patients/create'>Create new patient</a>";
                 if (!empty($patients)) {
                     echo "<table border='1' cellpadding='8' cellspacing='0'>";
                     echo "<thead>";
@@ -88,8 +93,8 @@ $section = $_GET['section'] ?? 'patients';
                         echo "<td>" . htmlspecialchars($patient['created_at']) . "</td>";
                         echo "<td>" . htmlspecialchars($patient['updated_at']) . "</td>";
                         echo "<td>";
-                        echo "<a href='?section=patients&edit=" . $patient['id'] . "'>Edit</a> | ";
-                        echo "<a href='?section=patients&delete=" . $patient['id'] . "' onclick='return confirm(\"Are you sure?\")'>Delete</a>";
+                        echo "<a href='/patients/edit?id=" . $patient['id'] . "'>Edit</a> | ";
+                        echo "<a href='/patients/delete?id=" . $patient['id'] . "' onclick='return confirm(\"Are you sure?\")'>Delete</a>";
                         echo "</td>";
                         echo "</tr>";
                     }
@@ -186,6 +191,52 @@ $section = $_GET['section'] ?? 'patients';
                     echo "<p>No medical notes found.</p>";
                 }
                 break;
+
+            case 'users':
+                if ($_SESSION['role_id'] != 1) {
+                    echo "<p>Access denied.</p>";
+                    break;
+                }
+                require_once __DIR__ . "/../../controllers/UserController.php";
+                $userController = new App\Controllers\UserController();
+                $users = $userController->index(); 
+                echo "<h2>Users List</h2>";
+                echo "<a href='/users/create'>Create new user</a>";
+                if (!empty($users)) {
+                    echo "<table border='1' cellpadding='8' cellspacing='0'>";
+                    echo "<thead>";
+                    echo "<tr>";
+                    echo "<th>ID</th>";
+                    echo "<th>Username</th>";
+                    echo "<th>Email</th>";
+                    echo "<th>Role</th>";
+                    echo "<th>Created At</th>";
+                    echo "<th>Updated At</th>";
+                    echo "<th>Actions</th>";
+                    echo "</tr>";
+                    echo "</thead>";
+                    echo "<tbody>";
+                    foreach ($users as $user) {
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($user['id']) . "</td>";
+                        echo "<td>" . htmlspecialchars($user['full_name']) . "</td>";
+                        echo "<td>" . htmlspecialchars($user['email']) . "</td>";
+                        echo "<td>" . ($user['role_id'] == 1 ? 'Admin' : ($user['role_id'] == 2 ? 'Doctor' : 'Reception')) . "</td>";
+                        echo "<td>" . htmlspecialchars($user['created_at']) . "</td>";
+                        echo "<td>" . htmlspecialchars($user['updated_at']) . "</td>";
+                        echo "<td>";
+                        echo "<a href='/users/edit?id=" . $user['id'] . "'>Edit</a> | ";
+                        echo "<a href='/users/delete?id=" . $user['id'] . "' onclick='return confirm(\"Are you sure?\")'>Delete</a>";
+                        echo "</td>";
+                        echo "</tr>";
+                    }
+                    echo "</tbody>";
+                    echo "</table>";
+                } else {
+                    echo "<p>No users found.</p>";
+                }
+                break;
+
 
             case 'logout':
                 session_destroy();
