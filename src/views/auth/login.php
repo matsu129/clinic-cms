@@ -11,5 +11,5 @@
 
     <button type="submit">Login</button>
 </form>
-<?php if (isset($error)) echo $error;
+<?php 
 include __DIR__ . '/../../../public/includes/footer.php'; ?>

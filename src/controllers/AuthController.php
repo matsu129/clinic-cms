@@ -17,6 +17,7 @@ class AuthController implements AuthInterface {
 
 
     public function login(string $email, string $password): bool {
+        $email = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
         $stmt = $this->db->prepare("SELECT id, full_name, role_id, password_hash FROM users WHERE email = :email LIMIT 1");
         $stmt->bindValue(':email', $email);
         $stmt->execute();
